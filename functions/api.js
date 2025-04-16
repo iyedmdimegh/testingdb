@@ -1,15 +1,49 @@
+// import express from "express";
+// import ServerlessHttp from "serverless-http";
+
+// const app = express();
+
+
+// app.get('/.netlify/functions/api', (req, res) => {
+//     return res.json({
+//         messages: "hello world!"
+//     })
+// })
+// await mongoose.connect("mongodb+srv://iyed:ohmygahh@drama.zzi1idx.mongodb.net/?retryWrites=true&w=majority&appName=drama");
+
+
+// const handler = ServerlessHttp(app);
+
+// module.exports.handler = async(event, context) => {
+//     const result = await handler(event, context);
+//     return result;
+// }
+
+
+
+
+
+
+
+
+
 import express from "express";
 import bodyParser from "body-parser";
-import { User } from "./models/user.js";
-import { data } from "./roaming.js";
+import { User } from "../models/user.js";
+import { data } from "../roaming.js";
+import mongoose from "mongoose";
+import ServerlessHttp from "serverless-http";
 
+
+
+mongoose.connect("mongodb+srv://iyed:ohmygahh@drama.zzi1idx.mongodb.net/?retryWrites=true&w=majority&appName=drama");
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
 
 // Routes
-app.post("/signup", async (req, res) => {
+app.post("/.netlify/functions/api/signup", async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = new User({ username, password });
@@ -20,7 +54,13 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.get('/.netlify/functions/api', async (req, res) => {
+    return res.json({
+        messages: "hello world!"
+    })
+})
+
+app.post("/.netlify/functions/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
@@ -36,7 +76,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Get all users' levels
-app.get("/users/levels", async (req, res) => {
+app.get("/.netlify/functions/api/users/levels", async (req, res) => {
   try {
     const users = await User.find({}, 'username level');
     const levels = users.map(user => ({
@@ -50,7 +90,7 @@ app.get("/users/levels", async (req, res) => {
 });
 
 // Check answer and update level
-app.post("/check-answer", async (req, res) => {
+app.post("/.netlify/functions/api/check-answer", async (req, res) => {
   try {
     const { userId, questionNumber, answer } = req.body;
     
@@ -90,8 +130,15 @@ app.post("/check-answer", async (req, res) => {
 });
 
 // Test route
-app.get("/", (req, res) => {
+app.get("/.netlify/functions/api/hi", (req, res) => {
   res.json({ message: "API is working!" });
 });
 
-export default app;
+// export default app;
+
+const handler = ServerlessHttp(app);
+
+module.exports.handler = async(event, context) => {
+    const result = await handler(event, context);
+    return result;
+}
